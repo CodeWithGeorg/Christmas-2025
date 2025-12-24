@@ -6,6 +6,8 @@ import GiftCardModal from './components/GiftCardModal';
 import Countdown from './components/Countdown';
 import MusicPlayer from './components/MusicPlayer';
 import { Analytics } from '@vercel/analytics/react';
+import { track } from '@vercel/analytics';
+
 
 
 const App: React.FC = () => {
@@ -88,6 +90,11 @@ const App: React.FC = () => {
   };
 
   if (platform === 'whatsapp') {
+    track('share', {
+  platform: 'whatsapp',
+  name: userNameToShare || 'anonymous'
+});
+
     celebrate();
     window.open(
       `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
@@ -96,6 +103,11 @@ const App: React.FC = () => {
   }
 
   else if (platform === 'twitter') {
+    track('share', {
+  platform: 'whatsapp',
+  name: userNameToShare || 'anonymous'
+});
+
     celebrate();
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
@@ -104,6 +116,11 @@ const App: React.FC = () => {
   }
 
   else if (platform === 'facebook') {
+    track('share', {
+  platform: 'whatsapp',
+  name: userNameToShare || 'anonymous'
+});
+
     celebrate();
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
@@ -113,6 +130,11 @@ const App: React.FC = () => {
 
   // ✅ INSTAGRAM (copy + notify + open app)
   else if (platform === 'instagram') {
+    track('share', {
+  platform: 'whatsapp',
+  name: userNameToShare || 'anonymous'
+});
+
     await navigator.clipboard.writeText(shareUrl);
     celebrate();
     setShowToast(true);
