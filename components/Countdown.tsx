@@ -1,7 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 
-const Countdown: React.FC = () => {
+interface CountdownProps {
+  onComplete?: () => void;
+}
+
+const Countdown: React.FC<CountdownProps> = ({ onComplete }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -15,20 +19,31 @@ const Countdown: React.FC = () => {
       const now = new Date().getTime();
       const difference = targetDate - now;
 
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60)
-        });
+      if (difference <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        if (onComplete) onComplete();
+        return true;
       }
+
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60)
+      });
+      return false;
     };
 
-    const timer = setInterval(calculateTimeLeft, 1000);
-    calculateTimeLeft();
+    const isDone = calculateTimeLeft();
+    if (isDone) return;
+
+    const timer = setInterval(() => {
+      const finished = calculateTimeLeft();
+      if (finished) clearInterval(timer);
+    }, 1000);
+
     return () => clearInterval(timer);
-  }, []);
+  }, [onComplete]);
 
   const TimerBox = ({ value, label }: { value: number, label: string }) => (
     <div className="flex flex-col items-center mx-2 md:mx-4">
