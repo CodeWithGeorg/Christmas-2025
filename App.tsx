@@ -5,6 +5,8 @@ import ChristmasTree from './components/ChristmasTree';
 import GiftCardModal from './components/GiftCardModal';
 import Countdown from './components/Countdown';
 import MusicPlayer from './components/MusicPlayer';
+import { Analytics } from '@vercel/analytics/react';
+
 
 const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -341,6 +343,7 @@ const App: React.FC = () => {
           border-radius: 2px;
         }
       `}} />
+      <Analytics />
     </div>
   );
 };
