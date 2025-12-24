@@ -1,5 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
+
+// Assuming the audio file is placed in src/assets/festive-beats.mp3
+// Adjust the path if it's in a different location, e.g., public/assets
+import audioFile from '../assets/Merry-Christmas.mp4';  // Replace with your actual file name and path
 
 const MusicPlayer: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -22,7 +25,7 @@ const MusicPlayer: React.FC = () => {
       <audio 
         ref={audioRef} 
         loop 
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
+        src={audioFile}  // Using the imported local audio file
       />
       
       <button 
