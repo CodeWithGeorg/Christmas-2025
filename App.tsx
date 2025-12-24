@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Snowfall from './components/Snowfall';
 import ChristmasTree from './components/ChristmasTree';
 import GiftCardModal from './components/GiftCardModal';
@@ -10,24 +10,69 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [isChristmasTime, setIsChristmasTime] = useState(false);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [fadeMessage, setFadeMessage] = useState(true);
+  
+  // Personalization states
+  const [senderName, setSenderName] = useState<string | null>(null);
+  const [showEntryOverlay, setShowEntryOverlay] = useState(false);
+  const [userNameToShare, setUserNameToShare] = useState('');
+
+  const festiveMessages = useMemo(() => [
+    "The spirit of Christmas is the spirit of love and of generosity and of goodness.",
+    "Christmas isn't just a season. It's a feeling that lives in our hearts.",
+    "The best gifts are the ones we share with the people we love.",
+    "Christmas waves a magic wand over the world, making everything softer and more beautiful.",
+    "May the miracle of Christmas fill your heart with warmth and love.",
+    "Gifts of time and love are the basic ingredients of a truly merry Christmas.",
+    "Peace on earth will come to stay, when we live Christmas every day.",
+    "Every snowflake is a kiss from heaven during this magical season."
+  ], []);
 
   useEffect(() => {
-    // Immediate check on mount for safety
+    // Check for personalization in URL
+    const params = new URLSearchParams(window.location.search);
+    const nameFromUrl = params.get('name');
+    if (nameFromUrl) {
+      setSenderName(nameFromUrl);
+      setShowEntryOverlay(true);
+    }
+
+    // Immediate check on mount for Christmas arrival
     const targetDate = new Date('December 25, 2025 00:00:00').getTime();
     if (Date.now() >= targetDate) {
       setIsChristmasTime(true);
     }
-  }, []);
+
+    // Message rotation effect
+    const interval = setInterval(() => {
+      setFadeMessage(false);
+      setTimeout(() => {
+        setCurrentMessageIndex((prev) => (prev + 1) % festiveMessages.length);
+        setFadeMessage(true);
+      }, 500);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [festiveMessages]);
 
   const handleCountdownComplete = () => {
     setIsChristmasTime(true);
   };
 
+  const getShareUrl = () => {
+    const baseUrl = window.location.origin + window.location.pathname;
+    if (userNameToShare.trim()) {
+      return `${baseUrl}?name=${encodeURIComponent(userNameToShare.trim())}`;
+    }
+    return baseUrl;
+  };
+
   const shareWebsite = (platform?: string) => {
-    const shareUrl = window.location.href;
+    const shareUrl = getShareUrl();
     const shareText = isChristmasTime 
-      ? "It's Christmas Time! 🎄 Celebrate the magic of 2025 with me!" 
-      : "Experience the magic of Christmas 2025! Generate your own AI gift card here 🎄✨";
+      ? `It's Christmas Time! 🎄 Celebrate with a magical wish from ${userNameToShare || 'George'}` 
+      : `Experience the magic of Christmas 2025! Check out this special wish ${userNameToShare ? 'from ' + userNameToShare : ''} 🎄✨`;
     
     if (platform === 'whatsapp') {
       window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
@@ -35,14 +80,6 @@ const App: React.FC = () => {
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
     } else if (platform === 'facebook') {
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
-    } else if (platform === 'instagram') {
-      if (navigator.share) {
-        navigator.share({ title: 'Christmas 2025 Magic', text: shareText, url: shareUrl }).catch(console.error);
-      } else {
-        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      }
     } else {
       if (navigator.share) {
         navigator.share({ title: 'Christmas 2025 Magic', text: shareText, url: shareUrl }).catch(console.error);
@@ -61,6 +98,25 @@ const App: React.FC = () => {
       
       {/* Control layer */}
       <MusicPlayer />
+
+      {/* Entry Greeting Overlay */}
+      {showEntryOverlay && senderName && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-2xl flex flex-col items-center justify-center text-center p-6 animate-fade-in">
+          <div className="mb-8 scale-150 drop-shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+            <i className="fas fa-envelope-open-text text-6xl text-red-500 animate-bounce"></i>
+          </div>
+          <h2 className="festive-font text-5xl md:text-8xl text-yellow-400 mb-4">A Magical Message</h2>
+          <p className="text-2xl md:text-4xl font-light italic text-blue-100 mb-12">
+            Waiting for you, from <span className="text-red-500 font-bold underline decoration-yellow-500/30 underline-offset-8">{senderName}</span>
+          </p>
+          <button 
+            onClick={() => setShowEntryOverlay(false)}
+            className="px-12 py-5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-full text-2xl font-bold shadow-2xl hover:scale-110 transition-transform festive-font border-b-4 border-red-950"
+          >
+            Open Your Magic Wish <i className="fas fa-sparkles ml-2"></i>
+          </button>
+        </div>
+      )}
 
       {/* Celebration Mode Overlay */}
       {isChristmasTime ? (
@@ -129,9 +185,11 @@ const App: React.FC = () => {
           <div className="bg-white/5 backdrop-blur-2xl p-6 md:p-10 rounded-[2.5rem] md:rounded-[3.5rem] border border-white/20 mt-4 md:mt-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group max-w-xl w-full mx-auto">
             <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             
-            <p className="text-lg md:text-3xl font-light italic text-blue-50 mb-6 md:mb-10 leading-relaxed drop-shadow-sm px-2">
-              "The spirit of Christmas is the spirit of love and of generosity and of goodness."
-            </p>
+            <div className={`transition-all duration-500 ${fadeMessage ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'}`}>
+              <p className="text-lg md:text-3xl font-light italic text-blue-50 mb-6 md:mb-10 leading-relaxed drop-shadow-sm px-2 min-h-[4.5rem] md:min-h-[6.5rem] flex items-center justify-center">
+                "{festiveMessages[currentMessageIndex]}"
+              </p>
+            </div>
 
             <div className="relative z-10">
               <button 
@@ -144,9 +202,21 @@ const App: React.FC = () => {
           </div>
 
           {/* Share Joy Section */}
-          <div className="mt-12 md:mt-16 flex flex-col items-center bg-black/10 backdrop-blur-sm p-4 md:p-6 rounded-3xl border border-white/5 w-full max-w-md">
-            <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-400 font-black mb-4 md:mb-6">Spread the Magic Joy!</p>
-            <div className="flex flex-wrap justify-center gap-3 md:gap-6">
+          <div className="mt-12 md:mt-16 flex flex-col items-center bg-black/10 backdrop-blur-sm p-6 rounded-[2.5rem] border border-white/5 w-full max-w-md">
+            <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-400 font-black mb-4">Personalize Your Share Link</p>
+            
+            <div className="w-full px-2 mb-6">
+              <input 
+                type="text" 
+                placeholder="Enter Your Name to Share" 
+                value={userNameToShare}
+                onChange={(e) => setUserNameToShare(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all text-center text-lg placeholder:text-white/20"
+              />
+            </div>
+
+            <p className="text-[10px] uppercase tracking-widest text-white/40 mb-4">Send the Magic to Friends</p>
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               <button onClick={() => shareWebsite('whatsapp')} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#25D366] flex items-center justify-center hover:scale-110 transition-all shadow-lg" title="Share on WhatsApp">
                 <i className="fab fa-whatsapp text-xl md:text-2xl"></i>
               </button>
@@ -175,7 +245,7 @@ const App: React.FC = () => {
       <GiftCardModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Toast Notification */}
-      <div className={`fixed top-6 md:top-10 left-1/2 -translate-x-1/2 bg-yellow-500 text-black font-black px-6 md:px-10 py-3 md:py-5 rounded-xl md:rounded-2xl shadow-2xl transition-all duration-500 z-[100] flex items-center border-b-4 border-yellow-700 w-[90%] sm:w-auto justify-center ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20 pointer-events-none'}`}>
+      <div className={`fixed top-6 md:top-10 left-1/2 -translate-x-1/2 bg-yellow-500 text-black font-black px-6 md:px-10 py-3 md:py-5 rounded-xl md:rounded-2xl shadow-2xl transition-all duration-500 z-[120] flex items-center border-b-4 border-yellow-700 w-[90%] sm:w-auto justify-center ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20 pointer-events-none'}`}>
         <i className="fas fa-sparkles mr-3 text-lg md:text-xl animate-spin"></i> Magic Link Copied!
       </div>
 
