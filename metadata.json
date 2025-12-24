@@ -1,0 +1,7 @@
+{
+  "name": "Christmas 2025 Magic",
+  "description": "A festive interactive experience featuring falling snow, a glowing Christmas tree, and personalized AI-powered gift cards for Christmas 2025.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
