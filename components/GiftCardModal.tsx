@@ -7,8 +7,25 @@ interface GiftCardModalProps {
   onClose: () => void;
 }
 
+interface CardTheme {
+  id: string;
+  name: string;
+  primary: string;
+  secondary: string;
+  bgClass: string;
+}
+
+const THEMES: CardTheme[] = [
+  { id: 'red', name: 'Crimson', primary: '#991b1b', secondary: '#450a0a', bgClass: 'bg-red-700' },
+  { id: 'green', name: 'Evergreen', primary: '#064e3b', secondary: '#022c22', bgClass: 'bg-emerald-900' },
+  { id: 'blue', name: 'Royal Blue', primary: '#1e3a8a', secondary: '#172554', bgClass: 'bg-blue-900' },
+  { id: 'purple', name: 'Majestic', primary: '#581c87', secondary: '#2e1065', bgClass: 'bg-purple-900' },
+  { id: 'midnight', name: 'Midnight', primary: '#0f172a', secondary: '#020617', bgClass: 'bg-slate-900' },
+];
+
 const GiftCardModal: React.FC<GiftCardModalProps> = ({ isOpen, onClose }) => {
   const [name, setName] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState<CardTheme>(THEMES[0]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,10 +41,10 @@ const GiftCardModal: React.FC<GiftCardModalProps> = ({ isOpen, onClose }) => {
     const ctx = canvas.getContext('2d');
     
     if (ctx) {
-      // Background Gradient - Rich Crimson
+      // Dynamic Background Gradient based on selection
       const gradient = ctx.createRadialGradient(600, 400, 100, 600, 400, 800);
-      gradient.addColorStop(0, '#991b1b'); 
-      gradient.addColorStop(1, '#450a0a'); 
+      gradient.addColorStop(0, selectedTheme.primary); 
+      gradient.addColorStop(1, selectedTheme.secondary); 
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1200, 800);
 
@@ -109,7 +126,7 @@ const GiftCardModal: React.FC<GiftCardModalProps> = ({ isOpen, onClose }) => {
       }
       ctx.fillText(line, 600, yPos);
 
-      // Footer Section - Updated with George's name
+      // Footer Section
       ctx.fillStyle = '#eab308';
       ctx.font = 'bold 28px sans-serif';
       ctx.fillText('🎄 Magical Holiday Wishes 🎄', 600, 660);
@@ -145,25 +162,45 @@ const GiftCardModal: React.FC<GiftCardModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-[2rem] p-6 md:p-8 max-w-lg w-full shadow-2xl transform transition-transform animate-modal-enter">
         <div className="flex justify-between items-center mb-4 md:mb-6">
-          <h2 className="festive-font text-3xl md:text-5xl text-red-600">Gift Card</h2>
+          <h2 className="festive-font text-3xl md:text-5xl text-red-600">Custom Gift Card</h2>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-red-600 transition-colors">
             <i className="fas fa-times text-xl md:text-2xl"></i>
           </button>
         </div>
         
-        <p className="text-gray-700 mb-6 md:mb-8 text-center text-sm md:text-lg italic leading-relaxed">
-          "Every snowflake is unique, and so is your message. Enter your name and let us craft a new piece of Christmas magic."
+        <p className="text-gray-700 mb-6 text-center text-sm md:text-base italic leading-relaxed">
+          "Select your theme and enter your name to craft a personalized piece of holiday magic."
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Color Selection */}
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-gray-400 font-bold text-center">Choose Your Card Theme</p>
+            <div className="flex justify-center gap-3">
+              {THEMES.map((theme) => (
+                <button
+                  key={theme.id}
+                  type="button"
+                  onClick={() => setSelectedTheme(theme)}
+                  className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-4 transition-all transform hover:scale-110 ${theme.bgClass} ${
+                    selectedTheme.id === theme.id ? 'border-yellow-400 scale-125 shadow-lg' : 'border-transparent'
+                  }`}
+                  title={theme.name}
+                />
+              ))}
+            </div>
+            <p className="text-center text-xs text-gray-500 font-medium">Theme: {selectedTheme.name}</p>
+          </div>
+
+          {/* Name Input */}
           <div className="relative">
-            <i className="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-red-300"></i>
+            <i className="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your Name"
-              className="w-full pl-12 pr-4 py-3 md:py-4 rounded-xl md:rounded-2xl border-2 border-red-50 outline-none focus:ring-4 focus:ring-red-100 transition-all text-lg md:text-xl text-gray-800"
+              placeholder="Recipient's Name"
+              className="w-full pl-12 pr-4 py-3 md:py-4 rounded-xl md:rounded-2xl border-2 border-gray-100 outline-none focus:ring-4 focus:ring-red-100 transition-all text-lg text-gray-800"
               required
               autoFocus
             />
@@ -179,7 +216,7 @@ const GiftCardModal: React.FC<GiftCardModalProps> = ({ isOpen, onClose }) => {
                 <i className="fas fa-snowflake animate-spin mr-3"></i> Crafting Magic...
               </span>
             ) : (
-              <span>Generate New Card 🎁</span>
+              <span>Create {selectedTheme.name} Card 🎁</span>
             )}
           </button>
         </form>
