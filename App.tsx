@@ -68,28 +68,67 @@ const App: React.FC = () => {
     return baseUrl;
   };
 
-  const shareWebsite = (platform?: string) => {
-    const shareUrl = getShareUrl();
-    const shareText = isChristmasTime 
-      ? `It's Christmas Time! 🎄 Celebrate with a magical wish from ${userNameToShare || 'George'}` 
-      : `Experience the magic of Christmas 2025! Check out this special wish ${userNameToShare ? 'from ' + userNameToShare : ''} 🎄✨`;
-    
-    if (platform === 'whatsapp') {
-      window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
-    } else if (platform === 'twitter') {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
-    } else if (platform === 'facebook') {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
-    } else {
-      if (navigator.share) {
-        navigator.share({ title: 'Christmas 2025 Magic', text: shareText, url: shareUrl }).catch(console.error);
-      } else {
-        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      }
-    }
+ const shareWebsite = async (platform?: string) => {
+  const shareUrl = getShareUrl();
+  const shareText = isChristmasTime 
+    ? `🎄 Merry Christmas! A magical wish from ${userNameToShare || 'George'} ✨`
+    : `🎄 Experience the magic of Christmas 2025 ${userNameToShare ? 'from ' + userNameToShare : ''} ✨`;
+
+  // 🎉 Confetti effect
+  const celebrate = () => {
+    import('canvas-confetti').then(confetti => {
+      confetti.default({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.7 }
+      });
+    });
   };
+
+  if (platform === 'whatsapp') {
+    celebrate();
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`,
+      '_blank'
+    );
+  }
+
+  else if (platform === 'twitter') {
+    celebrate();
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+      '_blank'
+    );
+  }
+
+  else if (platform === 'facebook') {
+    celebrate();
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      '_blank'
+    );
+  }
+
+  // ✅ INSTAGRAM (copy + notify + open app)
+  else if (platform === 'instagram') {
+    await navigator.clipboard.writeText(shareUrl);
+    celebrate();
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+
+    // Open Instagram (mobile-friendly)
+    window.open('https://www.instagram.com/', '_blank');
+  }
+
+  // 📋 Default = copy link
+  else {
+    await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+    celebrate();
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  }
+};
+
 
   return (
     <div className="relative min-h-screen text-white flex flex-col items-center justify-center p-4 selection:bg-red-500/30 overflow-x-hidden">
