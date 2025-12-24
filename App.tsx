@@ -1,132 +1,156 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import Snowfall from './components/Snowfall';
 import ChristmasTree from './components/ChristmasTree';
 import GiftCardModal from './components/GiftCardModal';
+import Countdown from './components/Countdown';
+import MusicPlayer from './components/MusicPlayer';
 
 const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [showToast, setShowToast] = useState(false);
 
-  // Background music handling
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.4;
-      if (isPlaying) {
-        audioRef.current.play().catch(err => {
-            console.log("Auto-play prevented by browser policy", err);
-            setIsPlaying(false);
-        });
-      } else {
-        audioRef.current.pause();
-      }
-    }
-  }, [isPlaying]);
-
-  const toggleMusic = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const shareWebsite = () => {
+  const shareWebsite = (platform?: string) => {
     const shareUrl = window.location.href;
     const shareText = "Experience the magic of Christmas 2025! Generate your own AI gift card here 🎄✨";
     
-    if (navigator.share) {
-      navigator.share({
-        title: 'Christmas 2025 Magic',
-        text: shareText,
-        url: shareUrl,
-      }).catch(console.error);
+    if (platform === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`, '_blank');
+    } else if (platform === 'twitter') {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`, '_blank');
+    } else if (platform === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, '_blank');
+    } else if (platform === 'instagram') {
+      if (navigator.share) {
+        navigator.share({ title: 'Christmas 2025 Magic', text: shareText, url: shareUrl }).catch(console.error);
+      } else {
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      }
     } else {
-      navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      if (navigator.share) {
+        navigator.share({ title: 'Christmas 2025 Magic', text: shareText, url: shareUrl }).catch(console.error);
+      } else {
+        navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      }
     }
   };
 
   return (
-    <div className="relative min-h-screen text-white flex flex-col items-center justify-center p-4">
+    <div className="relative min-h-screen text-white flex flex-col items-center justify-center p-4 selection:bg-red-500/30 overflow-x-hidden">
+      {/* Background layer */}
       <Snowfall />
+      
+      {/* Control layer */}
+      <MusicPlayer />
 
-      {/* Music Control - Fixed Top Right */}
-      <button 
-        onClick={toggleMusic}
-        className="fixed top-6 right-6 z-40 bg-white/10 hover:bg-white/20 p-4 rounded-full backdrop-blur-md border border-white/30 transition-all duration-300"
-      >
-        <i className={`fas ${isPlaying ? 'fa-volume-up' : 'fa-volume-mute'} text-2xl text-red-400`}></i>
-      </button>
-
-      {/* Main Content Container */}
-      <main className="flex flex-col items-center text-center max-w-2xl animate-fade-in duration-1000">
+      {/* Main Content Container - Elevated with Z-index */}
+      <main className="relative flex flex-col items-center text-center max-w-4xl animate-fade-in z-10 w-full py-12 md:py-20">
         
-        {/* Title */}
-        <h1 className="festive-font text-6xl md:text-8xl text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.5)] mb-8 animate-bounce">
-          Merry Christmas 2025
-        </h1>
-
-        <ChristmasTree />
-
-        {/* Festive Message */}
-        <div className="bg-white/5 backdrop-blur-sm p-6 rounded-3xl border border-white/10 mb-8 shadow-2xl">
-          <p className="text-xl md:text-2xl font-light italic leading-relaxed text-blue-100">
-            "The magic of Christmas is not in the presents, <br className="hidden md:block" />
-            but in His presence and the love we share."
+        {/* Title Section */}
+        <div className="mb-6 md:mb-8 group">
+          <h1 className="festive-font text-5xl sm:text-7xl md:text-9xl text-transparent bg-clip-text bg-gradient-to-b from-red-400 via-red-600 to-red-900 drop-shadow-[0_10px_20px_rgba(239,68,68,0.6)] animate-bounce inline-block transform group-hover:scale-110 transition-transform duration-500 px-2">
+            Merry Christmas 2025
+          </h1>
+          <p className="text-yellow-400 font-black tracking-[0.2em] md:tracking-[0.4em] text-[10px] sm:text-xs md:text-lg mt-2 md:mt-4 opacity-90 uppercase bg-black/20 backdrop-blur-md px-3 md:px-4 py-1 rounded-full inline-block">
+            A Winter Wonderland Experience
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-12">
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="px-10 py-5 bg-red-600 hover:bg-red-700 text-white rounded-full text-2xl font-bold shadow-lg shadow-red-900/40 transform hover:scale-105 transition-all festive-font border-b-4 border-red-900 active:border-b-0 active:translate-y-1"
-          >
-            Get My Gift Card <i className="fas fa-gift ml-2"></i>
-          </button>
-
-          <button 
-            onClick={shareWebsite}
-            className="px-10 py-5 bg-green-700 hover:bg-green-800 text-white rounded-full text-2xl font-bold shadow-lg shadow-green-900/40 transform hover:scale-105 transition-all festive-font border-b-4 border-green-950 active:border-b-0 active:translate-y-1"
-          >
-            Spread the Joy <i className="fas fa-share-alt ml-2"></i>
-          </button>
+        {/* Countdown Section */}
+        <div className="my-4 md:my-6 scale-75 sm:scale-90 md:scale-110 transform">
+          <Countdown />
         </div>
 
-        {/* Footer info */}
-        <footer className="text-white/40 text-sm mt-8">
-          Made with festive magic for the year 2025
+        {/* Tree Section */}
+        <div className="transform hover:scale-110 transition-transform duration-1000 my-6 md:my-10 drop-shadow-[0_0_30px_rgba(34,197,94,0.3)] scale-90 md:scale-100">
+          <ChristmasTree />
+        </div>
+
+        {/* Action Card */}
+        <div className="bg-white/5 backdrop-blur-2xl p-6 md:p-10 rounded-[2.5rem] md:rounded-[3.5rem] border border-white/20 mt-4 md:mt-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group max-w-xl w-full mx-auto">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          
+          <p className="text-lg md:text-3xl font-light italic text-blue-50 mb-6 md:mb-10 leading-relaxed drop-shadow-sm px-2">
+            "The spirit of Christmas is the spirit of love and of generosity and of goodness."
+          </p>
+
+          <div className="relative z-10">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="w-full sm:w-auto px-10 md:px-16 py-5 md:py-7 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white rounded-full text-xl md:text-3xl font-bold shadow-2xl shadow-red-900/60 transform hover:scale-105 md:hover:scale-110 transition-all festive-font border-b-4 md:border-b-8 border-red-950 active:translate-y-2 active:border-b-0 ring-4 ring-red-500/20"
+            >
+              Get Your Gift Card <i className="fas fa-gift ml-2 md:ml-3"></i>
+            </button>
+          </div>
+        </div>
+
+        {/* Share Joy Section */}
+        <div className="mt-12 md:mt-16 flex flex-col items-center bg-black/10 backdrop-blur-sm p-4 md:p-6 rounded-3xl border border-white/5 w-full max-w-md">
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] md:tracking-[0.3em] text-yellow-400 font-black mb-4 md:mb-6">Spread the Magic Joy!</p>
+          <div className="flex flex-wrap justify-center gap-3 md:gap-6">
+            <button onClick={() => shareWebsite('whatsapp')} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#25D366] flex items-center justify-center hover:scale-110 transition-all shadow-lg" title="Share on WhatsApp">
+              <i className="fab fa-whatsapp text-xl md:text-2xl"></i>
+            </button>
+            <button onClick={() => shareWebsite('facebook')} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#1877F2] flex items-center justify-center hover:scale-110 transition-all shadow-lg" title="Share on Facebook">
+              <i className="fab fa-facebook text-xl md:text-2xl"></i>
+            </button>
+            <button onClick={() => shareWebsite('instagram')} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center hover:scale-110 transition-all shadow-lg" title="Share on Instagram">
+              <i className="fab fa-instagram text-xl md:text-2xl"></i>
+            </button>
+            <button onClick={() => shareWebsite('twitter')} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#1DA1F2] flex items-center justify-center hover:scale-110 transition-all shadow-lg" title="Share on Twitter">
+              <i className="fab fa-twitter text-xl md:text-2xl"></i>
+            </button>
+            <button onClick={() => shareWebsite()} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white/10 flex items-center justify-center hover:scale-110 transition-all shadow-lg backdrop-blur-md border border-white/20" title="Copy Link">
+              <i className="fas fa-link text-xl md:text-2xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <footer className="text-white/30 text-[10px] md:text-[12px] mt-16 md:mt-20 uppercase tracking-[0.3em] md:tracking-[0.4em] font-bold">
+          Designed by George for a Magical 2025
         </footer>
       </main>
 
-      {/* Modal for Gift Card Generation */}
+      {/* Modal */}
       <GiftCardModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-      {/* Hidden Audio Source */}
-      <audio 
-        ref={audioRef} 
-        loop 
-        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Placeholder, in a real scenario use an actual Christmas track URL
-      />
-      {/* 
-        Note: For a real "We Wish You A Merry Christmas" track, you'd link to a public domain mp3 file.
-        Using a standard creative commons holiday music track link would be better for actual production.
-      */}
-
-      {/* Toast Notification for Share */}
-      {showToast && (
-        <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl animate-bounce z-50">
-          Link copied to clipboard! 🎄
-        </div>
-      )}
+      {/* Toast Notification */}
+      <div className={`fixed top-6 md:top-10 left-1/2 -translate-x-1/2 bg-yellow-500 text-black font-black px-6 md:px-10 py-3 md:py-5 rounded-xl md:rounded-2xl shadow-2xl transition-all duration-500 z-[100] flex items-center border-b-4 border-yellow-700 w-[90%] sm:w-auto justify-center ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-20 pointer-events-none'}`}>
+        <i className="fas fa-sparkles mr-3 text-lg md:text-xl animate-spin"></i> Magic Link Copied!
+      </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(30px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .animate-fade-in {
-          animation: fade-in 1.5s ease-out forwards;
+          animation: fade-in 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        input[type=range] {
+          -webkit-appearance: none;
+          background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          height: 18px;
+          width: 18px;
+          border-radius: 50%;
+          background: #eab308;
+          cursor: pointer;
+          margin-top: -7px;
+          box-shadow: 0 0 5px rgba(0,0,0,0.3);
+          border: 2px solid white;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 4px;
+          background: rgba(255,255,255,0.2);
+          border-radius: 2px;
         }
       `}} />
     </div>
