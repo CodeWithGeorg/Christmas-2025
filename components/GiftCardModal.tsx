@@ -88,7 +88,7 @@ const GiftCardModal: React.FC<GiftCardModalProps> = ({ isOpen, onClose }) => {
       ctx.fillStyle = '#fde047';
       ctx.textAlign = 'center';
       ctx.font = 'bold 100px serif';
-      ctx.fillText('Merry Christmas 2025', 600, 200);
+      ctx.fillText('Merry Christmas 2026', 600, 200);
 
       // Recipient name
       ctx.shadowBlur = 0;
@@ -143,11 +143,11 @@ const GiftCardModal: React.FC<GiftCardModalProps> = ({ isOpen, onClose }) => {
       
       ctx.fillStyle = '#fde047';
       ctx.font = '16px sans-serif';
-      ctx.fillText('Christmas 2025 Magic • Spread the Love', 600, 765);
+      ctx.fillText('Christmas 2026 Magic • Spread the Love', 600, 765);
 
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.download = `Christmas2025_${name}_${magicId}.png`;
+      link.download = `Christmas2026_${name}_${magicId}.png`;
       link.href = dataUrl;
       link.click();
     }

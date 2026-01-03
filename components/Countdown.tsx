@@ -15,7 +15,7 @@ const Countdown: React.FC<CountdownProps> = ({ onComplete }) => {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const targetDate = new Date('December 25, 2025 00:00:00').getTime();
+      const targetDate = new Date('December 25, 2026 00:00:00').getTime();
       const now = new Date().getTime();
       const difference = targetDate - now;
 
@@ -46,18 +46,23 @@ const Countdown: React.FC<CountdownProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   const TimerBox = ({ value, label }: { value: number, label: string }) => (
-    <div className="flex flex-col items-center mx-2 md:mx-4">
-      <div className="bg-red-900/40 backdrop-blur-md border border-yellow-500/30 w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.3)]">
-        <span className="text-2xl md:text-3xl font-bold text-yellow-400 tabular-nums">
-          {value.toString().padStart(2, '0')}
-        </span>
+    <div className="flex flex-col items-center mx-3 md:mx-6 group">
+      <div className="relative">
+        <div className="absolute inset-0 bg-blue-500/20 blur-xl group-hover:bg-red-500/30 transition-all duration-700"></div>
+        <div className="relative bg-white/5 backdrop-blur-2xl border border-white/10 w-20 h-24 md:w-28 md:h-32 rounded-3xl flex items-center justify-center shadow-2xl transition-transform group-hover:scale-105 group-hover:border-white/30">
+          <span className="text-3xl md:text-5xl font-black text-white tabular-nums tracking-tighter drop-shadow-lg">
+            {value.toString().padStart(2, '0')}
+          </span>
+        </div>
       </div>
-      <span className="text-xs md:text-sm mt-2 uppercase tracking-widest text-white/70 font-bold">{label}</span>
+      <span className="text-[10px] md:text-xs mt-4 uppercase tracking-[0.4em] text-white/40 font-black group-hover:text-yellow-400/70 transition-colors">
+        {label}
+      </span>
     </div>
   );
 
   return (
-    <div className="flex justify-center items-center py-6 animate-pulse">
+    <div className="flex justify-center items-center py-10">
       <TimerBox value={timeLeft.days} label="Days" />
       <TimerBox value={timeLeft.hours} label="Hours" />
       <TimerBox value={timeLeft.minutes} label="Mins" />
